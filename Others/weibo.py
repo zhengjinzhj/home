@@ -2,10 +2,8 @@
 
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
-import time
+from Others.tools import *
 from bs4 import BeautifulSoup
-import os
-import requests
 import re
 
 
@@ -43,6 +41,8 @@ class WeiBo(object):
             self.browser.quit()
 
     def scroll_down(self, count):
+        # scroll down the page, return false if there are still contents wrapped
+
         print('Scrolling down: %d...' % count)
         js = 'window.scrollTo(0, document.body.scrollHeight)'
         self.browser.execute_script(js)
@@ -54,6 +54,8 @@ class WeiBo(object):
         return False  # Otherwise, just keep scrolling down.
 
     def get_models_info(self):
+        # get models info(model name and id) from given group in 'My Following' page
+
         group_page = self.photo_url_base + self.my_id + '/myfollow?gid=' + self.group_id
         print("Gathering models' info from the given page......")
         self.browser.set_page_load_timeout(6)
@@ -73,6 +75,8 @@ class WeiBo(object):
         return models_info
 
     def get_page_content(self, model_id):
+        # get model's photo page after the page is fully loaded, and return the content
+
         page_url = self.photo_url_base + model_id + '/photos'
         self.browser.set_page_load_timeout(10)
         try:
@@ -92,20 +96,21 @@ class WeiBo(object):
         return content
 
     def get_link_sets(self, model_id):
+        # get links in every album of the model
+
         content = self.get_page_content(model_id)
         soup = BeautifulSoup(content, 'html.parser')
         model_name = soup.find('title').string
         model_name = model_name[:-6]  # like 梁不凉baby的微博_微博
         # print('The model\'s name is "%s"' % model_name
-        model_folder = 'Weibo/' + model_name
-        self.make_folder(model_folder)
+        # model_folder = 'Weibo/' + model_name
+        make_folder(os.getcwd(), model_name)  # model name folder
         albums = soup.select('ul[class="photo_album_list clearfix"]')
         print('This user has %d albums.' % len(albums))
         total_photo_download = 0
         for album in albums:
             album_name = album['group_id']  # Album name
-            album_location = model_folder + '/' + album_name
-            self.make_folder(album_location)
+            make_folder(os.getcwd(), album_name)  # album name folder under model name folder
             # print(album.prettify()
             photo_links = album.find_all(src=re.compile('thumb300'))
             print('There are %d photos in album "%s".' % (len(photo_links), album_name))
@@ -114,10 +119,12 @@ class WeiBo(object):
                 photo_link = photo_link.replace('thumb300', 'large')
                 if '?tags' in photo_link:
                     photo_link = re.sub('\?tags.*', '', photo_link)
-                self.save_photo(album_location, photo_link)
+                st_downloader(photo_link)
                 total_photo_download += 1
-        print('Finally, ALL photos of this model are downloaded. ' \
+            os.chdir(os.path.pardir)  # Switch to parent folder after downloading all photos in current album
+        print('Finally, ALL photos of this model are downloaded.'
               'There are %d photos in total.' % total_photo_download)
+        os.chdir(os.path.pardir)  # Switch to parent folder after downloading all this model's photos
 
     @staticmethod
     def make_folder(folder_name):
@@ -143,6 +150,7 @@ class WeiBo(object):
 
     def main(self):
         # self.login()
+        make_folder('D:\Download', 'Weibo')
         models_info = self.get_models_info()
         for model_info in models_info:
             model_id = model_info[1]
@@ -150,5 +158,7 @@ class WeiBo(object):
             self.get_link_sets(model_id)
         self.browser.quit()
 
+
 demo = WeiBo()
+# print(demo.get_models_info())
 demo.main()

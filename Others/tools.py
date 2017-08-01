@@ -18,10 +18,11 @@ import threading
 import time
 
 # download_url = sys.argv[1]  # 传入的命令行参数，要下载文件的url
-# download_url = 'http://patch2.51mag.com/2017/ALI213-Halo-Wars-2-V1.4.1936.2-Trainer%205MrAntiFun.rar'
+download_url = 'http://patch2.51mag.com/2017/ALI213-Halo-Wars-2-V1.4.1936.2-Trainer%205MrAntiFun.rar'
 
 
 def handler(start, end, url, filename):
+    # only for mt_downloader using
     headers = {
         'Range': 'bytes=%d-%d' % (start, end)
     }
@@ -30,7 +31,7 @@ def handler(start, end, url, filename):
     # 写入文件对应的位置
     with open(filename, 'r+b') as fp:
         fp.seek(start)
-        fp.tell()
+        # fp.tell()  # current file position
         fp.write(r.content)
 
 
@@ -59,12 +60,13 @@ def mt_downloader(url, rename='', num_thread=2):
             print('File %s does not support multi threading download' % file_name)
             return
 
-        # 创建一个和要下载文件一样大小的文件
-        fp = open(file_name, 'wb')
-        fp.truncate(file_size)
-        fp.close()
+        # # 创建一个和要下载文件一样大小的文件, 非必须
+        # fp = open(file_name, 'wb')
+        # fp.truncate(file_size)
+        # fp.close()
 
         # 启用多线程写文件
+        thread_list = list([])
         part = file_size // num_thread
         for i in range(num_thread):
             start = part * i
@@ -76,6 +78,7 @@ def mt_downloader(url, rename='', num_thread=2):
             t = threading.Thread(target=handler, kwargs={'start': start, 'end': end, 'url': url, 'filename': file_name})
             t.setDaemon(True)
             t.start()
+            thread_list.append(t)
 
         # 等待所有线程下载完毕
         # main_thread = threading.current_thread()
@@ -84,16 +87,18 @@ def mt_downloader(url, rename='', num_thread=2):
         #     if t is main_thread:
         #         continue
         #     t.join()
+        for t in thread_list:
+            t.join()
         print('%s> %s downloading complete!' % (time.strftime('%H:%M:%S'), file_name))
     else:
         print('%s> %s already exists, skip...' % (time.strftime('%H:%M:%S'), file_name))
 
-# if __name__ == '__main__':
-#     start_time = datetime.datetime.now().replace(microsecond=0)
-#     download_file(download_url)
-#     end_time = datetime.datetime.now().replace(microsecond=0)
-#     print('用时： ', end='')
-#     print(end_time-start_time)
+if __name__ == '__main__':
+    # start_time = datetime.datetime.now().replace(microsecond=0)
+    mt_downloader(download_url)
+    # end_time = datetime.datetime.now().replace(microsecond=0)
+    print('用时： ', end='')
+    # print(end_time-start_time)
 
 
 def st_downloader(url, rename=''):
