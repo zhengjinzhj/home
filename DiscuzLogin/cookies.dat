@@ -1,0 +1,4 @@
+#LWP-Cookies-2.0
+Set-Cookie3: yunsuo_session_verify=14c969216d6af455a7f5329ba5a1e4eb; path="/"; domain=".ftoow.com"; path_spec; domain_dot; expires="2021-09-25 20:37:47Z"; HttpOnly=None; version=0
+Set-Cookie3: 9070a_lastpos=other; path="/"; domain="www.ftoow.com"; path_spec; expires="2017-09-25 12:52:08Z"; version=0
+Set-Cookie3: 9070a_lastvisit="0%091474807928%09%2Fmember.php%3Fmodlogging%26actionlogin%26infloatyes%26handlekeylogin%26inajax1%26ajaxtargetfwin_content_login"; path="/"; domain="www.ftoow.com"; path_spec; expires="2017-09-25 12:52:08Z"; version=0
