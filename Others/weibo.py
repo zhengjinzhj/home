@@ -13,7 +13,7 @@ class WeiBo(object):
 
     def __init__(self):
         self.chrome_options = webdriver.ChromeOptions()
-        self.chrome_options.add_argument('user-data-dir=C:\Users\zheng\AppData\Local\Google\Chrome\User Data')
+        self.chrome_options.add_argument('user-data-dir=C:\\Users\\Administrator\\AppData\\Local\\Google\\Chrome\\User Data')
         self.browser = webdriver.Chrome(chrome_options=self.chrome_options)
         self.login_url = 'http://weibo.com/login.php'
         self.username = '15828643152'
@@ -22,7 +22,8 @@ class WeiBo(object):
         self.photo_url_base = 'http://weibo.com/p/100505'  # 'model_id'/photos
         self.group_id = '3719539584307337'
 
-    def login(self):  # Do not need to login when using user data.
+    def login(self):
+        # Do not need to login when using user data.
         # self.browser.set_window_position(300, 0)
         self.browser.set_page_load_timeout(6)
         try:
@@ -36,13 +37,13 @@ class WeiBo(object):
         except TimeoutException:
             self.browser.execute_script('window.stop()')  # Page loads a long time after logging in successfully.
         if self.my_id in self.browser.current_url:
-            print 'Log in successfully.'
+            print('Log in successfully.')
         else:
-            print 'Cannot log in, please check your username and password.'
+            print('Cannot log in, please check your username and password.')
             self.browser.quit()
 
     def scroll_down(self, count):
-        print 'Scrolling down: %d...' % count
+        print('Scrolling down: %d...' % count)
         js = 'window.scrollTo(0, document.body.scrollHeight)'
         self.browser.execute_script(js)
         time.sleep(3)
@@ -54,7 +55,7 @@ class WeiBo(object):
 
     def get_models_info(self):
         group_page = self.photo_url_base + self.my_id + '/myfollow?gid=' + self.group_id
-        print "Gathering models' info from the given page......"
+        print("Gathering models' info from the given page......")
         self.browser.set_page_load_timeout(6)
         try:
             self.browser.get(group_page)
@@ -83,11 +84,11 @@ class WeiBo(object):
         while not self.scroll_down(count):
             count += 1
             # result = self.scroll_down(count)
-        print 'Finally, the page is fully loaded. :-D'
+        print('Finally, the page is fully loaded. :-D')
         content = self.browser.page_source
         # soup = BeautifulSoup(content, 'html.parser')
         # html = open('photo.html', 'w')
-        # print >>html, soup.prettify().encode('utf-8')  # Print to file!!!
+        # print(>>html, soup.prettify().encode('utf-8')  # print(to file!!!
         return content
 
     def get_link_sets(self, model_id):
@@ -95,19 +96,19 @@ class WeiBo(object):
         soup = BeautifulSoup(content, 'html.parser')
         model_name = soup.find('title').string
         model_name = model_name[:-6]  # like 梁不凉baby的微博_微博
-        # print 'The model\'s name is "%s"' % model_name
+        # print('The model\'s name is "%s"' % model_name
         model_folder = 'Weibo/' + model_name
         self.make_folder(model_folder)
         albums = soup.select('ul[class="photo_album_list clearfix"]')
-        print 'This user has %d albums.' % len(albums)
+        print('This user has %d albums.' % len(albums))
         total_photo_download = 0
         for album in albums:
             album_name = album['group_id']  # Album name
             album_location = model_folder + '/' + album_name
             self.make_folder(album_location)
-            # print album.prettify()
+            # print(album.prettify()
             photo_links = album.find_all(src=re.compile('thumb300'))
-            print 'There are %d photos in album "%s".' % (len(photo_links), album_name)
+            print('There are %d photos in album "%s".' % (len(photo_links), album_name))
             for link in photo_links:
                 photo_link = str(link['src'])
                 photo_link = photo_link.replace('thumb300', 'large')
@@ -115,37 +116,37 @@ class WeiBo(object):
                     photo_link = re.sub('\?tags.*', '', photo_link)
                 self.save_photo(album_location, photo_link)
                 total_photo_download += 1
-        print 'Finally, ALL photos of this model are downloaded. ' \
-              'There are %d photos in total.' % total_photo_download
+        print('Finally, ALL photos of this model are downloaded. ' \
+              'There are %d photos in total.' % total_photo_download)
 
     @staticmethod
     def make_folder(folder_name):
         if not os.path.exists(folder_name):
-            print 'Creating folder: "%s"' % folder_name
+            print('Creating folder: "%s"' % folder_name)
             os.mkdir(folder_name)
         else:
-            print 'Folder "%s" already exists, skip...' % folder_name
+            print('Folder "%s" already exists, skip...' % folder_name)
 
     @staticmethod
     def save_photo(folder_name, photo_link):
         photo_name = photo_link.split('/').pop()
         full_address = folder_name + '/' + photo_name
         if not os.path.isfile(full_address):
-            print 'Downloading photo %s' % photo_name
+            print('Downloading photo %s' % photo_name)
             data = requests.get(photo_link)
             data = data.content
             photo = open(full_address, 'wb')
             photo.write(data)
             photo.close()
         else:
-            print 'Photo %s already exists, skip...' % photo_name
+            print('Photo %s already exists, skip...' % photo_name)
 
     def main(self):
         # self.login()
         models_info = self.get_models_info()
         for model_info in models_info:
             model_id = model_info[1]
-            print '======Found a model, her name is: %s======' % model_info[0]
+            print('======Found a model, her name is: %s======' % model_info[0])
             self.get_link_sets(model_id)
         self.browser.quit()
 
