@@ -4,12 +4,10 @@
 """
 http://blog.topspeedsnail.com/archives/8462
 multi threading downloader
-
 基本步骤：
 1. 把要下载的文件平均分成几块
 2. 每个线程分别下载对应的块
 3. 把各块写入到文件中相应的位置
-
 """
 
 import os
@@ -19,9 +17,11 @@ import time
 
 # download_url = sys.argv[1]  # 传入的命令行参数，要下载文件的url
 download_url = 'http://patch2.51mag.com/2017/ALI213-Halo-Wars-2-V1.4.1936.2-Trainer%205MrAntiFun.rar'
+download_url3 = 'http://wx4.sinaimg.cn/large/68cd4d61gy1fhe3w03ns4j21w02iox6u.jpg'  # big photo
 
 
 def handler(start, end, url, filename):
+    print(time.strftime('%H:%M:%S'), start)
     # only for mt_downloader using
     headers = {
         'Range': 'bytes=%d-%d' % (start, end)
@@ -31,8 +31,10 @@ def handler(start, end, url, filename):
     # 写入文件对应的位置
     with open(filename, 'r+b') as fp:
         fp.seek(start)
-        # fp.tell()  # current file position
+        fp.tell()  # current file position
         fp.write(r.content)
+        fp.close()
+    print(time.strftime('%H:%M:%S'), start)
 
 
 def mt_downloader(url, rename='', num_thread=2):
@@ -53,7 +55,7 @@ def mt_downloader(url, rename='', num_thread=2):
         r = requests.head(url)
         try:
             # Content-Length获得文件主体的大小，当http服务器使用Connection:keep-alive时，不支持Content-Length
-            file_size = int(r.headers['content-length'])
+            file_size = int(r.headers['Content-Length'])
             if r.status_code != 200:
                 print('%s: Please check the url!' % file_name)
         except KeyError:
@@ -61,7 +63,7 @@ def mt_downloader(url, rename='', num_thread=2):
             return
 
         # # 创建一个和要下载文件一样大小的文件, 非必须
-        # fp = open(file_name, 'wb')
+        fp = open(file_name, 'wb')
         # fp.truncate(file_size)
         # fp.close()
 
@@ -76,9 +78,9 @@ def mt_downloader(url, rename='', num_thread=2):
                 end = start + part
 
             t = threading.Thread(target=handler, kwargs={'start': start, 'end': end, 'url': url, 'filename': file_name})
-            t.setDaemon(True)
-            t.start()
             thread_list.append(t)
+            # t.setDaemon(True)
+            t.start()
 
         # 等待所有线程下载完毕
         # main_thread = threading.current_thread()
@@ -90,15 +92,16 @@ def mt_downloader(url, rename='', num_thread=2):
         for t in thread_list:
             t.join()
         print('%s> %s downloading complete!' % (time.strftime('%H:%M:%S'), file_name))
+        fp.close()
     else:
         print('%s> %s already exists, skip...' % (time.strftime('%H:%M:%S'), file_name))
 
-if __name__ == '__main__':
-    # start_time = datetime.datetime.now().replace(microsecond=0)
-    mt_downloader(download_url)
-    # end_time = datetime.datetime.now().replace(microsecond=0)
-    print('用时： ', end='')
-    # print(end_time-start_time)
+# if __name__ == '__main__':
+#     start_time = datetime.datetime.now().replace(microsecond=0)
+#     mt_downloader(download_url)
+#     end_time = datetime.datetime.now().replace(microsecond=0)
+#     print('用时： ', end='')
+#     print(end_time-start_time)
 
 
 def st_downloader(url, rename=''):
@@ -136,5 +139,8 @@ def make_folder(location, folder):
         os.chdir(directory)
 
 
-# make_folder('D:\download\游戏', 'cs_go')
-# st_downloader('http://cdn.steamstatic.com.8686c.com/steam/apps/81958/movie480.webm')
+make_folder('D:\download\游戏', 'cs_go')
+# print(time.strftime('%H:%M:%S'))
+mt_downloader(download_url, num_thread=4)
+# st_downloader(download_url3)
+# print(time.strftime('%H:%M:%S'))
