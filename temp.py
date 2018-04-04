@@ -408,6 +408,7 @@ import time
 
 def job(url):
     file_name = str(url.split('/')[-1])
+    # add headers to avoid anti-leeching
     headers = {'Referer': 'http://www.baidu.com'}
     response = requests.get(url, headers=headers)
     f = open(file_name, 'wb')
@@ -422,6 +423,7 @@ def get_time():
 
 if __name__ == '__main__':
     pool = Pool()
+    # batch link(str) making
     urls = ['http://i.meizitu.net/2018/03/32b{:02d}.jpg'.format(f) for f in range(1, 20)]
     pool.map(job, urls)
     pool.close()
