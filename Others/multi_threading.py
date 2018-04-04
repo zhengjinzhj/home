@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 
 import threading
-from Queue import Queue
-from taobaomm import TaobaoMM
+from queue import Queue
+from Others.taobaomm import TaobaoMM
 
 model_id = '2926468580'
 album_id = '10001044155'
@@ -21,13 +21,13 @@ def get_albums():
         album_id = album[0]
         album_name = album[1]
         album_page = album[2]
-        print 'There are %s pictures in %s: %s' % (album_page, album_name, album_id)
+        print('There are %s pictures in %s: %s' % (album_page, album_name, album_id))
         TaobaoMM.make_folder(album_name)
         create_jobs(album_id, album_name)
 
 
 def create_workers():
-    for _ in xrange(4):
+    for _ in range(4):
         worker = threading.Thread(target=work)
         worker.daemon = True
         worker.start()

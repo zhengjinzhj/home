@@ -283,115 +283,146 @@
 #
 # sys.stdout.write('\b' * 64 + 'Now: %d, Total: %s')
 
-import os
+# import os
+# import requests
+# import threading
+# from urllib import request
+# import time
+#
+# url3 = 'http://wx4.sinaimg.cn/large/68cd4d61gy1fhe3w03ns4j21w02iox6u.jpg'  # big photo
+# url = 'http://patch2.51mag.com/2017/ALI213-Halo-Wars-2-V1.4.1936.2-Trainer%205MrAntiFun.rar'
+#
+#
+# def build_range(value, nums):
+#     lst = []
+#     for i in range(nums):
+#         if i == 0:
+#             lst.append('%s-%s' % (i, int(round(1 + i * value/(nums*1.0) + value/(nums*1.0)-1, 0))))
+#         else:
+#             lst.append('%s-%s' % (int(round(1 + i * value/(nums*1.0), 0)),
+#                                   int(round(1 + i * value/(nums*1.0) + value/(nums*1.0)-1, 0))))
+#     return lst
+#
+#
+# def main(url, split_by=6):
+#     start_time = time.time()
+#     if not url:
+#         print("Please Enter some url to begin download.")
+#         return
+#
+#     file_name = url.split('/')[-1]
+#     file_size = requests.head(url).headers['Content-Length']
+#     # r = requests.head(url)
+#     # print(r.headers)
+#     print("%s bytes to download." % file_size)
+#     if not file_size:
+#         print("Size cannot be determined.")
+#         return
+#
+#     data_dict = {}
+#
+#     # split total num bytes into ranges
+#     ranges = build_range(int(file_size), split_by)
+#
+#     def download_chunk(idx, i_range):
+#         req = request.Request(url)
+#         req.headers['Range'] = 'bytes={}'.format(i_range)
+#         data_dict[idx] = request.urlopen(req).read()
+#
+#     # create one downloading thread per chunk
+#     downloader = [
+#         threading.Thread(
+#             target=download_chunk,
+#             args=(idx, i_range),
+#         )
+#         for idx, i_range in enumerate(ranges)
+#         ]
+#
+#     # start threads, let run in parallel, wait for all to finish
+#     for th in downloader:
+#         th.start()
+#     for th in downloader:
+#         th.join()
+#
+#     print('done: got {} chunks, total {} bytes'.format(
+#         len(data_dict), sum((
+#             len(chunk) for chunk in data_dict.values()
+#         ))
+#     ))
+#
+#     print("--- %s seconds ---" % str(time.time() - start_time))
+#
+#     if os.path.exists(file_name):
+#         os.remove(file_name)
+#     # reassemble file in correct order
+#     with open(file_name, 'wb') as fh:
+#         for _idx, chunk in sorted(data_dict.items()):
+#             fh.write(chunk)
+#
+#     print("Finished Writing file %s" % file_name)
+#     print('file size {} bytes'.format(os.path.getsize(file_name)))
+#
+# if __name__ == '__main__':
+#     # main(url)
+#     build_range(3333333, 5)
+
+# import requests
+# from bs4 import BeautifulSoup
+# import re
+#
+#
+# link = 'http://www.itokoo.com/read.php?tid=34064'
+# response = requests.get(link).content
+# soup = BeautifulSoup(response.decode('gbk'), 'html.parser')
+# pattern = re.compile('https://pan.baidu.com/s/(.*?)".*?密码(.*?)</div>', re.S)
+# a = soup.find('a', class_='download')
+# link_and_pw = re.findall(pattern, response.decode('gbk'))
+# print(link_and_pw)
+
+# import requests
+# from bs4 import BeautifulSoup
+
+# response = requests.get('http://bbs.a9vg.com/forum.php?mod=viewthread&tid=5332209&page=1')
+# with open('temp.html', 'r') as f:
+#     soup = BeautifulSoup(f, 'html.parser')
+# chapter = soup.select('.t_table')[0]
+# # print(chapter)
+# for td in chapter.select('td > p'):
+#     for child in td.children:
+#         if child.string is None or child.string == '\n':
+#             continue
+#         print(child.string)
+#         print('-------------')
+
+# import requests
+# from bs4 import BeautifulSoup
+#
+# response = requests.get('https://buluo.qq.com/p/detail.html?bid=324498&pid=9058147-1522718436_324498_&from=share_qq')
+# soup = BeautifulSoup(response.text, 'html.parser')
+# print(soup.prettify())
+
+from multiprocessing import Pool
 import requests
-import threading
-from urllib import request
 import time
 
-url3 = 'http://wx4.sinaimg.cn/large/68cd4d61gy1fhe3w03ns4j21w02iox6u.jpg'  # big photo
-url = 'http://patch2.51mag.com/2017/ALI213-Halo-Wars-2-V1.4.1936.2-Trainer%205MrAntiFun.rar'
+
+def job(url):
+    file_name = str(url.split('/')[-1])
+    headers = {'Referer': 'http://www.baidu.com'}
+    response = requests.get(url, headers=headers)
+    f = open(file_name, 'wb')
+    f.write(response.content)
+    print('%s: downloading %s' % (get_time(), file_name))
+    f.close()
 
 
-def build_range(value, nums):
-    lst = []
-    for i in range(nums):
-        if i == 0:
-            lst.append('%s-%s' % (i, int(round(1 + i * value/(nums*1.0) + value/(nums*1.0)-1, 0))))
-        else:
-            lst.append('%s-%s' % (int(round(1 + i * value/(nums*1.0), 0)), int(round(1 + i * value/(nums*1.0) + value/(nums*1.0)-1, 0))))
-    return lst
+def get_time():
+    return time.strftime('%H:%M:%S', time.localtime())
 
-
-def main(url, split_by=6):
-    start_time = time.time()
-    if not url:
-        print("Please Enter some url to begin download.")
-        return
-
-    file_name = url.split('/')[-1]
-    file_size = requests.head(url).headers['Content-Length']
-    # r = requests.head(url)
-    # print(r.headers)
-    print("%s bytes to download." % file_size)
-    if not file_size:
-        print("Size cannot be determined.")
-        return
-
-    data_dict = {}
-
-    # split total num bytes into ranges
-    ranges = build_range(int(file_size), split_by)
-
-    def download_chunk(idx, i_range):
-        req = request.Request(url)
-        req.headers['Range'] = 'bytes={}'.format(i_range)
-        data_dict[idx] = request.urlopen(req).read()
-
-    # create one downloading thread per chunk
-    downloader = [
-        threading.Thread(
-            target=download_chunk, 
-            args=(idx, i_range),
-        )
-        for idx, i_range in enumerate(ranges)
-        ]
-
-    # start threads, let run in parallel, wait for all to finish
-    for th in downloader:
-        th.start()
-    for th in downloader:
-        th.join()
-
-    print('done: got {} chunks, total {} bytes'.format(
-        len(data_dict), sum((
-            len(chunk) for chunk in data_dict.values()
-        ))
-    ))
-
-    print("--- %s seconds ---" % str(time.time() - start_time))
-
-    if os.path.exists(file_name):
-        os.remove(file_name)
-    # reassemble file in correct order
-    with open(file_name, 'wb') as fh:
-        for _idx, chunk in sorted(data_dict.items()):
-            fh.write(chunk)
-
-    print("Finished Writing file %s" % file_name)
-    print('file size {} bytes'.format(os.path.getsize(file_name)))
 
 if __name__ == '__main__':
-    # main(url)
-    build_range(3333333, 5)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    pool = Pool()
+    urls = ['http://i.meizitu.net/2018/03/32b{:02d}.jpg'.format(f) for f in range(1, 20)]
+    pool.map(job, urls)
+    pool.close()
+    pool.join()

@@ -1,11 +1,9 @@
 # -*- coding:utf-8 -*-
 
-# import requests
 from bs4 import BeautifulSoup
 import os
 import time
-from proxy import request
-from queue import MongoQueue
+import requests
 import threading
 import multiprocessing
 
@@ -20,7 +18,7 @@ class MeiZi(object):
     @staticmethod
     # 公共方法，抓取页面并返回通过BeautifulSoup解析后的页面源码
     def get_page_source(url):
-        html = request.get(url, 3)
+        html = requests.get(url)
         soup = BeautifulSoup(html.text, 'html.parser')
         return soup
 
@@ -55,17 +53,17 @@ class MeiZi(object):
     # 公共方法，创建文件夹
     def make_folder(folder_name):
         if not os.path.exists(folder_name):
-            print 'Creating folder: %s' % folder_name
+            print('Creating folder: %s' % folder_name)
             os.mkdir(folder_name)
         else:
-            print 'Folder already exists, skip...'
+            print('Folder already exists, skip...')
 
     @staticmethod
     # 公共方法，下载图片
     def save_img(picture_url):
-        data = request.get(picture_url, 3)
+        data = requests.get(picture_url)
         file_name = picture_url.split('/')[-1]
-        print 'Downloading picture: %s' % file_name
+        print('Downloading picture: %s' % file_name)
         f = open(file_name, 'wb')
         f.write(data.content)
         f.close()
@@ -76,9 +74,9 @@ class MeiZi(object):
         while True:
             try:
                 link = self.crawl_queue.pop()
-                print link
+                print(link)
             except KeyError:
-                print '队列中没有数据'
+                print('队列中没有数据')
                 break
             else:
                 img_urls = []
@@ -88,9 +86,9 @@ class MeiZi(object):
                 self.make_folder(album_name)
                 os.chdir(path + '\\' + album_name)
                 total_page = self.get_album_size(link)
-                print 'There are %d pictures in this album.' % total_page
+                print('There are %d pictures in this album.' % total_page)
                 # page_num = 0  # 添加一个计数器判断相册是否下载完毕
-                for page in xrange(1, total_page+1):
+                for page in range(1, total_page+1):
                     # page_num += 1  # 当page_num=total_page时，就是下载相册中最后一张图片的时候
                     page_link = link + '/' + str(page)
                     picture_url = self.get_picture_link(page_link)
@@ -105,12 +103,12 @@ class MeiZi(object):
                     #         '获取时间': time.ctime()
                     #     }
                     #     self.beauty_collect.save(post)
-                    #     print '插入数据库成功'
+                    #     print('插入数据库成功')
                     # else:
                     #     self.save_img(picture_url)
                 self.crawl_queue.complete(link)  # 设置为完成状态
                 self.img_queue.push_img_url(album_name, img_urls)
-                print '插入数据库成功'
+                print('插入数据库成功')
 
     def main(self):  # will NOT be used with multi threads and processes
         ts = time.time()
@@ -119,12 +117,12 @@ class MeiZi(object):
         # main_url = 'http://www.mzitu.com/all'
         # for album in self.gather_albums(main_url):
         #     if self.beauty_collect.find_one({'相册地址': album[0]}):
-        #         print 'This Album already downloaded, skip...'
+        #         print('This Album already downloaded, skip...'
         #     else:
         #         self.download_one_album(album[0], album[1])
         # First time: 1036 files in 20 folders, 113MB in 207.34499979 seconds. (No proxy, no user agent)
         # Second time: 1148 files in 22 folders, 125MB in 250.858999968 seconds. (With proxy and user agent)
-        print 'Take %s seconds in total.' % (time.time() - ts)
+        print('Take %s seconds in total.' % (time.time() - ts))
 
     def threads_crawler(self, max_threads=10):
         self.download_one_album()
@@ -145,7 +143,7 @@ class MeiZi(object):
     def process_crawler(self):
         process = []
         num_cpu = multiprocessing.cpu_count()
-        print '将启动个%d进程' % num_cpu
+        print('将启动个%d进程' % num_cpu)
         for _ in range(num_cpu):
             p = multiprocessing.Process(target=self.threads_crawler)
             p.start()
