@@ -5,6 +5,7 @@ import re
 import csv
 import os
 import requests
+from bs4 import BeautifulSoup
 
 
 # http://smovie.caribbeancom.com/sample/movies/110616-297/1080p.mp4
@@ -89,10 +90,28 @@ class Caribbeancom(object):
                 # link = link.replace('https', 'http')
                 self.save_picture(link, name)
 
-demo = Caribbeancom()
-demo.write_csv()
+# demo = Caribbeancom()
+# demo.write_csv()
 # demo.save_thumbnails()
 
-
+# test_url = 'http://www.caribbeancom.com/listpages/all1.htm'
+# ssr_proxy = {'http': '127.0.0.1:1080', 'https': '127.0.0.1:1080'}
+# main_url = 'http://www.tokyo-hot.com/product/?page=1'
+# parameter = {'filter': '撮りおろし徹底陵辱ビデオ', 'type': 'genre'}
+# response = requests.get(main_url, proxies=ssr_proxy, params=parameter).text
+# soup = BeautifulSoup(response, 'html.parser')
+# print(soup.prettify())
+with open('test2.txt', 'r', encoding='utf-8') as f:
+    soup = BeautifulSoup(f, 'html.parser')
+    for item in soup.find_all(class_='detail'):
+        title = item.find(class_='title').string.strip()
+        # print(temp.find('a').string.strip())
+        movie_id = item.a.get('href').split('/')[2]
+        index = item.img.get('alt')
+        # alt = item.img.get('alt')
+        thumbnail = item.img.get('src').replace('220x124', '820x462')
+        actress = item.find(class_='actor').string.strip()[:-14]
+        print(actress)
+        # print(type(item.select('a[itemprop="actor"]')))
 
 
