@@ -5,6 +5,7 @@ import re
 import csv
 import os
 import requests
+from pprint import pprint
 from bs4 import BeautifulSoup
 
 
@@ -101,17 +102,29 @@ class Caribbeancom(object):
 # response = requests.get(main_url, proxies=ssr_proxy, params=parameter).text
 # soup = BeautifulSoup(response, 'html.parser')
 # print(soup.prettify())
-with open('test2.txt', 'r', encoding='utf-8') as f:
-    soup = BeautifulSoup(f, 'html.parser')
-    for item in soup.find_all(class_='detail'):
-        title = item.find(class_='title').string.strip()
-        # print(temp.find('a').string.strip())
-        movie_id = item.a.get('href').split('/')[2]
-        index = item.img.get('alt')
-        # alt = item.img.get('alt')
-        thumbnail = item.img.get('src').replace('220x124', '820x462')
-        actress = item.find(class_='actor').string.strip()[:-14]
-        print(actress)
-        # print(type(item.select('a[itemprop="actor"]')))
+# with open('test2.txt', 'r', encoding='utf-8') as f:
+#     soup = BeautifulSoup(f, 'html.parser')
+#     for item in soup.find_all(class_='detail'):
+#         title = item.find(class_='title').string.strip()
+#         # print(temp.find('a').string.strip())
+#         movie_id = item.a.get('href').split('/')[2]
+#         index = item.img.get('alt')
+#         # alt = item.img.get('alt')
+#         thumbnail = item.img.get('src').replace('220x124', '820x462')
+#         actress = item.find(class_='actor').string.strip()[:-14]
+#         print(actress)
 
+
+def save_thumbnails(csv_file, url_line, id_line):
+    with open(csv_file, 'r', encoding='utf-8') as csv_file:
+        reader = csv.DictReader(csv_file)
+        data = [row for row in reader]
+        picture_link = [row[url_line] for row in data]
+        picture_id = [row[id_line] for row in data]
+        link_id = zip(picture_link, picture_id)
+        for i in link_id:
+            print(i[1])
+
+
+save_thumbnails('carib_newest.csv', 'Thumbnail', 'Movie ID')
 

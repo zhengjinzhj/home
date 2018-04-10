@@ -19,34 +19,36 @@ def make_folder(location, folder):
         return os.getcwd()
 
 
-def save_photo(photo_link, photo_format='', link_index=0, back_index=0):
-    # for link like http://www.test.com/image.jpg format
-    if photo_format == '':
-        photo_name = photo_link.split('/').pop()
-    # for link like http://images-eds.xboxlive.com/image?url=z951ykbFvR2Ec.wW11 format
-    elif link_index != 0:
-        photo_name = str(link_index) + photo_format
-    # for link like http://www.test.com/moviepages/031817_501/images/str.jpg format
+def st_downloader(link_id_pair):
+    url = link_id_pair[0]
+    file_name = link_id_pair[1] + '.' + url.split('.')[-1]
+    if not os.path.isfile(file_name):
+        print('Downloading %s' % file_name)
+        response = requests.get(url)
+        file = open(file_name, 'wb')
+        file.write(response.content)
+        file.close()
     else:
-        split_link = photo_link.split('/')
-        photo_name = split_link[back_index] + photo_format
-    if not os.path.isfile(photo_name):
-        print('Downloading photo %s' % photo_name)
-        data = requests.get(photo_link).content
-        photo = open(photo_name, 'wb')
-        photo.write(data)
-        photo.close()
-    else:
-        print('Photo %s already exists, skip...' % photo_name)
+        print('%s already exists, skip...' % file_name)
+
+
+def get_link_id_pair(csv_file, url_line, id_line):
+    with open(csv_file, 'r', encoding='utf-8') as csv_file:
+        reader = csv.DictReader(csv_file)
+        data = [row for row in reader]
+        picture_link = [row[url_line] for row in data]
+        picture_id = [row[id_line] for row in data]
+        link_id_pair = dict(zip(picture_link, picture_id))
+        return link_id_pair
 
 
 def main(csv_file_name):
     make_folder('D:\Download', 'forza')
     with open(csv_file_name, encoding='utf-8') as csv_file:
         reader = csv.DictReader(csv_file)
-        photo_links = [row['Image Url'] for row in reader]
-        for i in range(204, len(photo_links)):
-            link = photo_links[i]
+        links = [row['Image Url'] for row in reader]
+        for i in range(204, len(links)):
+            link = links[i]
             # split_link = link.split('/')
             # split_link.pop()
             # split_link.pop()
@@ -61,4 +63,3 @@ def main(csv_file_name):
     #     save_img(k, v)
 
 main('C:\\Users\\Administrator\\PycharmProjects\\home\\Others\\achievements.csv')
-

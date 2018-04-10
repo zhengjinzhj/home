@@ -15,6 +15,7 @@ base_url_th = 'http://www.tokyo-hot.com/product/?page='
 csv_title_th = ['Movie ID', 'Series No', 'Title', 'Actress', 'Cover']
 # http://smovie.1pondo.tv/sample/movies/092916_394/1080p.mp4
 # http://smovie.caribbeancom.com/sample/movies/110616-297/1080p.mp4
+# http://my.cdn.tokyo-hot.com/media/samples/6081.mp4
 
 
 # http://stackoverflow.com/questions/28165639/
