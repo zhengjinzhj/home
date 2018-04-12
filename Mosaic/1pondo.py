@@ -16,6 +16,8 @@ csv_title_th = ['Movie ID', 'Series No', 'Title', 'Actress', 'Cover']
 # http://smovie.1pondo.tv/sample/movies/092916_394/1080p.mp4
 # http://smovie.caribbeancom.com/sample/movies/110616-297/1080p.mp4
 # http://my.cdn.tokyo-hot.com/media/samples/6081.mp4
+# http://sample.heyzo.com/contents/3000/1313/heyzo_hd_1313_sample.mp4
+# http://sample.heyzo.com/contents/3000/0001/sample.mp4
 
 
 # http://stackoverflow.com/questions/28165639/
